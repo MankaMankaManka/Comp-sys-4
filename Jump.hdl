@@ -35,5 +35,5 @@ PARTS:
   And(a=j2, b=zr, out=instruction2);
   And(a=j3, b=ng,  out=instruction3);
   Or(a=instruction1, b=instruction2, out=in1orin2);
-  Or(a=in1orin2, b=instruction3, out=jump);
+  Or(a=in1orin2, b=instruction3, out=out);
 }
