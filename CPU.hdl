@@ -25,40 +25,43 @@
  * than to the address resulting from executing the current instruction. 
  */
 
-CHIP CPU {
+    CHIP CPU {
 
     IN  inM[16],         // M value input  (M = contents of RAM[A])
         instruction[16], // Instruction for execution
-        reset;           // Signals whether to re-start the current
-                         // program (reset==1) or continue executing
-                         // the current program (reset==0).
+        reset;           // Signals whether to re-start the current program
+                         // (reset == 1) or continue executing the current
+                         // program (reset == 0).
 
     OUT outM[16],        // M value output
-        writeM,          // Write to M? 
-        addressM[15],    // Address in data memory (of M)
-        pc[15];          // address of next instruction
+        writeM,          // Write into M? 
+        addressM[15],    // RAM address (of M)
+        pc[15];          // ROM address (of next instruction)
 
     PARTS:
-    Not(in=instruction[15], out=notInstructionMSB);
-    Mux16(a=outMuxInput, b=instruction, sel=notInstructionMSB, out=instructionMuxOutput);
-    Or(a=notInstructionMSB, b=instruction[5], out=loadIntoA);
-    ARegister(in=instructionMuxOutput, load=loadIntoA, out=A, out[0..14]=addressM);
-    And(a=instruction[15], b=instruction[12], out=AorM);
-    Mux16(a=A, b=inM, sel=AorM, out=AM);
-    ALU(x=D, y=AM, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=outMuxInput, out=outM, zr=zeroFlag, ng=negativeFlag);
-    And(a=instruction[15], b=instruction[4], out=loadIntoD);
-    DRegister(in=outMuxInput, load=loadIntoD, out=D);
-    And(a=instruction[15], b=instruction[3], out=writeM);
-    Not(in=negativeFlag, out=positiveFlag);
-    Not(in=zeroFlag, out=nonZeroFlag);
-    And(a=instruction[15], b=instruction[0], out=jumpGreaterThan);
-    And(a=positiveFlag, b=nonZeroFlag, out=load1);
-    And(a=instruction[15], b=instruction[1], out=jumpEqual);
-    And(a=jumpEqual, b=zeroFlag, out=load2);
-    And(a=instruction[15], b=instruction[2], out=jumpLessThan);
-    And(a=jumpLessThan, b=negativeFlag, out=load3);
-    Or(a=load1, b=load2, out=loadTemp1);
-    Or(a=load3, b=loadTemp1, out=loadDecision);
-    PC(in=A, load=loadDecision, inc=true, reset=reset, out[0..14]=pc);
-
+    Not(in=instruction[15], out=isAInstruction);
+    Not(in=isAInstruction, out=isCInstruction);
+    And(a=isCInstruction, b=instruction[5], out=useALUOutput); 
+    Mux16(a=instruction, b=ALUout, sel=useALUOutput, out=inputToARegister);
+    Or(a=isAInstruction, b=useALUOutput, out=loadARegister);
+    ARegister(in=inputToARegister, load=loadARegister, out=dataInARegister);
+    Mux16(a=dataInARegister, b=inM, sel=instruction[12], out=ALUInput);
+    And(a=isCInstruction, b=instruction[4], out=loadDRegister);
+    DRegister(in=ALUout, load=loadDRegister, out=dataInDRegister);
+    ALU(x=dataInDRegister, y=ALUInput, zx=instruction[11], nx=instruction[10], 
+        zy=instruction[9], ny=instruction[8], f=instruction[7],
+        no=instruction[6], out=ALUout, zr=zeroFlag, ng=negativeFlag);
+    Or16(a=false, b=dataInARegister, out[0..14]=addressM);
+    Or16(a=false, b=ALUout, out=outM);
+    And(a=isCInstruction, b=instruction[3], out=writeM);
+    And(a=zeroFlag, b=instruction[1], out=jumpIfZero);   // Jump if zero
+    And(a=negativeFlag, b=instruction[2], out=jumpIfNegative); // Jump if negative
+    Or(a=zeroFlag, b=negativeFlag, out=jumpIfZeroOrNegative);
+    Not(in=jumpIfZeroOrNegative, out=positiveCondition); // Positive condition (not zero and not negative)
+    And(a=positiveCondition, b=instruction[0], out=jumpIfPositive); // Jump if positive
+    Or(a=jumpIfZero, b=jumpIfNegative, out=jumpIfLessOrEqual);
+    Or(a=jumpIfLessOrEqual, b=jumpIfPositive, out=jumpCondition); // Load PC if condition met and jump if condition
+    And(a=isCInstruction, b=jumpCondition, out=loadPC); // Only load PC if C instruction
+    Not(in=loadPC, out=incrementPC); // Only increment if not loading
+    PC(in=dataInARegister, inc=incrementPC, load=loadPC, reset=reset, out[0..14]=pc);
 }
