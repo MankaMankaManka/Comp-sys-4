@@ -29,10 +29,10 @@ PARTS:
     And(a=instruction[15], b=true, out=type);
 
     Mux8Way16(a=false, b=false, c=false, d=false, e=false, f=false, g=false, h=instruction, sel=type, 
-            outA=d1, outB=c1, outC=j1);
+            out[0]=d1, out[1]=c1, out[2]=j1);
 
     Mux8Way16(a=instruction[0..2], b=instruction[3..9], c=instruction[10..12], 
             d=instruction[13..15], e=false, f=false, g=false, h=false, sel=type, 
-            outA=d2, outB=d3, outC=c2, outD=c3, outE=c4, outF=c5, outG=c6, outH=j2, outI=j3);
+            out[0]=d2, out[1]=d3, out[2]=c2, out[3]=c3, out[4]=c4, out[5]=c5, out[6]=c6, out[7]=j2, out[8]=j3);
 
 }
