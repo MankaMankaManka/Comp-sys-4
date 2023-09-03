@@ -25,14 +25,16 @@ CHIP Decode {
         j1,j2,j3;           // Jump wires
 
 PARTS:
-        PARTS:
-    And(a=instruction[15], b=true, out=type);
 
-    Mux8Way16(a=false, b=false, c=false, d=false, e=false, f=false, g=false, h=instruction, sel=type, 
-            out[0]=d1, out[1]=c1, out[2]=j1);
-
-    Mux8Way16(a=instruction[0..2], b=instruction[3..9], c=instruction[10..12], 
-            d=instruction[13..15], e=false, f=false, g=false, h=false, sel=type, 
-            out[0]=d2, out[1]=d3, out[2]=c2, out[3]=c3, out[4]=c4, out[5]=c5, out[6]=c6, out[7]=j2, out[8]=j3);
+    Mux16(a=isA, b=false, sel=type, out=type);
+    Not(in=in[0], out=isZero);
+    Mux16(a=false, b=isZero, sel=type, out=a);
+    Mux16(a=in, b=false, sel=type, out=c1c2c3c4c5c6);
+    And(a=c1c2c3c4c5c6[0], b=type, out=d1);
+    And(a=c1c2c3c4c5c6[1], b=type, out=d2);
+    And(a=c1c2c3c4c5c6[2], b=type, out=d3);
+    And(a=in[13], b=type, out=j1);
+    And(a=in[14], b=type, out=j2);
+    And(a=in[15], b=type, out=j3);
 
 }
