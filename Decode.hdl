@@ -26,8 +26,8 @@ CHIP Decode {
 
 PARTS:
     // Put your code here:
-    And(a=in[15], b=true, out=type);
-    And(a=in[15], b=true, out=isel);
+    And16(a=in[15], b=true, out=type);
+    And16(a=in[15], b=true, out=isel);
     Mux(a=false, b=in[12], sel=isel, out=a);
     Mux(a=false, b=in[11], sel=isel, out=c1);
     Mux(a=false, b=in[10], sel=isel, out=c2);
