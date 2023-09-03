@@ -25,7 +25,24 @@ CHIP Decode {
         j1,j2,j3;           // Jump wires
 
 PARTS:
+
     And(a=true, b=in[15], out=type);
+    Not(in=in[15], out=ni);
+    And(a=ni, b=in[0], out=value[0]);
+    And(a=ni, b=in[1], out=value[1]);
+    And(a=ni, b=in[2], out=value[2]);
+    And(a=ni, b=in[3], out=value[3]);
+    And(a=ni, b=in[4], out=value[4]);
+    And(a=ni, b=in[5], out=value[5]);
+    And(a=ni, b=in[6], out=value[6]);
+    And(a=ni, b=in[7], out=value[7]);
+    And(a=ni, b=in[8], out=value[8]);
+    And(a=ni, b=in[9], out=value[9]);
+    And(a=ni, b=in[10], out=value[10]);
+    And(a=ni, b=in[11], out=value[11]);
+    And(a=ni, b=in[12], out=value[12]);
+    And(a=ni, b=in[13], out=value[13]);
+    And(a=ni, b=in[14], out=value[14]);
     And(a=in[15], b=in[12], out=a);
     And(a=in[15], b=in[11], out=c1);
     And(a=in[15], b=in[10], out=c2);
@@ -39,5 +56,4 @@ PARTS:
     And(a=in[15], b=in[2], out=j1);
     And(a=in[15], b=in[1], out=j2);
     And(a=in[15], b=in[0], out=j3);
-
 }
